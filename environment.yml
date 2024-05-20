@@ -1,0 +1,8 @@
+name: release_smallsemi
+
+channels:
+  - conda-forge
+
+dependencies:
+  - pyyaml
+  - bs4

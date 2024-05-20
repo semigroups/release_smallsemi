@@ -53,16 +53,15 @@ def _check_change_log():
     """
     contents = get_file_contents("CHANGELOG")
     regex = re.compile(
-        r"##\s*Version\s*"
-        + new_version()
-        + r"\s*\(released\s*(\d\d/\d\d/\d\d\d\d)\)"
+        r"Version\s*" + new_version() + r"\s*\((\d\d/\d\d/\d\d)\)"
     )
     match = regex.search(contents)
 
     if match:
-        if match.group(1) != today():
+        date_fmt = "%d/%m/%y"
+        if match.group(1) != today(fmt=date_fmt):
             exit_abort(
-                f"The date in CHANGELOG is {match.group(1)} but today is {today()}"
+                f"The date in CHANGELOG is {match.group(1)} but today is {today(fmt=date_fmt)}"
             )
     else:
         exit_abort(
@@ -113,19 +112,18 @@ add_checks(
 
 def release_steps():
     "The release steps that will be displayed."
+    indent = " " * 4
     return (
         f"git push origin {rc_branch()}",
-        f"open a PR from {rc_branch()} to {stable_branch()} "
-        f"(create {stable_branch()} if necessary):\n"
-        + f"https://github.com/Semigroups/semigroups/pull/new/{rc_branch()}"
-        + " wait for the CI to complete successfully",
+        f"""open a PR from {rc_branch()} to {stable_branch()} create {stable_branch()} if necessary):
+{indent}https://github.com/Semigroups/semigroups/pull/new/{rc_branch()}
+{indent}wait for the CI to complete successfully""",
         f"git checkout {stable_branch()} && git merge {rc_branch()}",
-        "use ReleaseTools `release` script in semigroups directory, type:\n"
-        + "    ~/git/gap/ReleaseTools/release-gap-package\n"
-        + "    (ensure that a personal access token is specified using one "
-        + "    of the methods described here:\n"
-        + "    https://github.com/gap-system/ReleaseTools"
-        + '    under "GitHub access token")',
+        f"""use ReleaseTools `release` script in the smallsemi directory, type:
+{indent}~/git/gap/ReleaseTools/release-gap-package
+{indent}(ensure that a personal access token is specified using one of the methods described here:
+{indent}https://github.com/gap-system/ReleaseTools
+{indent}under "GitHub access token")""",
         f"git branch -D {rc_branch()} && git push origin --delete {rc_branch()}",
         f"git checkout main && git merge {stable_branch()} && git push origin main",
     )
